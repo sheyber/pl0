@@ -3,7 +3,7 @@
 
 «‎Язык PL/0 — учебный языком программирования, использующийся в качестве примера разработки компилятора.» - [источник](http://progopedia.ru/language/pl0/)
 
-### Сборка:
+### Сборка
 ```bash
 # зависимости: make, dart-sdk-2.x
 make
@@ -14,3 +14,14 @@ make
 # дамп AST
 ./pl0 examples/fact.pas
 ```
+
+### TODO
+- [x] Lexer
+- [x] Parser
+- [ ] Semantic analyzer
+- [ ] Smarter error handling
+- [ ] Stupid optimization
+- [ ] Compiler
+- [ ] Virtual Machine
+- [ ] CLI
+- [ ] Testing and debug
