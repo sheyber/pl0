@@ -1,0 +1,36 @@
+/**
+ * Сущность Token
+*/
+
+enum TokenType {
+  IDENT,
+  NUMBER,
+
+  LPAR,
+  RPAR,
+
+  PLUS,
+  MINUS,
+  STAR,
+  SLASH,
+
+  MORE,
+  LESS,
+  NOT_EQ,
+  EQ,
+
+  SET_EQ,
+
+  SEM, // ;
+  COMMA // ,
+}
+
+class Token {
+  final String value;
+  final TokenType type;
+  final int line; // номер строки в программе, на которой находится лексема
+
+  Token(this.type, this.value, this.line);
+
+  String toString() => "Token[$line]($value)";
+}
