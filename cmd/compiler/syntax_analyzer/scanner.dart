@@ -52,12 +52,12 @@ class Scanner {
         var value = "";
         while (i < source.length && _word.contains(source[i]))
           value += source[i++];
-        var type = (isKeyword(value)) ? TokenType.KEYWORD : TokenType.IDENT;
+        var type = (_isKeyword(value)) ? TokenType.KEYWORD : TokenType.IDENT;
         tokens.add(Token(type, value, lines));
         continue;
       } else if (i < source.length - 1 && (current + source[i + 1]) == ':=') {
         tokens.add(Token(TokenType.SET_EQ, current + source[++i], lines));
-      } else if (isSym(current)) {
+      } else if (_isSym(current)) {
         tokens.add(Token(_syms[current], current, lines));
       } else if (current == '\n') {
         lines++;
@@ -70,8 +70,8 @@ class Scanner {
     return tokens;
   }
 
-  static bool isKeyword(String value) => _keywords.contains(value);
-  static bool isSym(String value) => _syms.containsKey(value);
+  static bool _isKeyword(String value) => _keywords.contains(value);
+  static bool _isSym(String value) => _syms.containsKey(value);
 
   static throwScannerError(String msg, {int line}) {
     print("ScannerError[$line]: $msg");
