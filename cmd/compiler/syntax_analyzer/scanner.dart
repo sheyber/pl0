@@ -20,7 +20,10 @@ class Scanner {
     '<': TokenType.LESS,
     '#': TokenType.NOT_EQ,
     ';': TokenType.SEM,
-    ',': TokenType.COMMA
+    ',': TokenType.COMMA,
+    '(': TokenType.LPAR,
+    ')': TokenType.RPAR,
+    '.': TokenType.END_POINT
   };
 
   static const _keywords = [
@@ -47,14 +50,14 @@ class Scanner {
         while (i < source.length && _number.contains(source[i]))
           value += source[i++];
         tokens.add(Token(TokenType.NUMBER, value, lines));
-        continue;
+        i--;
       } else if (_word.contains(current)) {
         var value = "";
         while (i < source.length && _word.contains(source[i]))
           value += source[i++];
         var type = (_isKeyword(value)) ? TokenType.KEYWORD : TokenType.IDENT;
         tokens.add(Token(type, value, lines));
-        continue;
+        i--;
       } else if (i < source.length - 1 && (current + source[i + 1]) == ':=') {
         tokens.add(Token(TokenType.SET_EQ, current + source[++i], lines));
       } else if (_isSym(current)) {

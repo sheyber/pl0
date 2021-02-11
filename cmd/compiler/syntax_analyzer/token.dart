@@ -24,6 +24,7 @@ enum TokenType {
 
   SEM, // ;
   COMMA, // ,
+  END_POINT, // .
 
   EOF
 }
