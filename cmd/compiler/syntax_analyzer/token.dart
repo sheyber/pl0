@@ -5,6 +5,7 @@
 enum TokenType {
   IDENT,
   NUMBER,
+  KEYWORD,
 
   LPAR,
   RPAR,
@@ -22,7 +23,9 @@ enum TokenType {
   SET_EQ,
 
   SEM, // ;
-  COMMA // ,
+  COMMA, // ,
+
+  EOF
 }
 
 class Token {
@@ -32,5 +35,5 @@ class Token {
 
   Token(this.type, this.value, this.line);
 
-  String toString() => "Token[$line]($value)";
+  String toString() => "Token[$line]($type, $value)";
 }
