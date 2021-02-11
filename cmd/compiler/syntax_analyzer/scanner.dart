@@ -62,7 +62,7 @@ class Scanner {
       } else if (current == '\n') {
         lines++;
       } else if (current != ' ' && current != '\t') {
-        throwScannerError('unknow token "$current"', line: lines);
+        _throwScannerError('unknow token "$current"', line: lines);
       }
     }
 
@@ -73,7 +73,7 @@ class Scanner {
   static bool _isKeyword(String value) => _keywords.contains(value);
   static bool _isSym(String value) => _syms.containsKey(value);
 
-  static throwScannerError(String msg, {int line}) {
+  static _throwScannerError(String msg, {int line}) {
     print("ScannerError[$line]: $msg");
     exit(0);
   }
