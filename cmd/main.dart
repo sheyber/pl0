@@ -1,15 +1,12 @@
-import 'dart:convert';
+import 'dart:io';
 
 import './compiler/syntax_analyzer/scanner.dart';
 import 'compiler/syntax_analyzer/parser.dart';
 
 void main(List<String> args) {
-  // print('hello!');
-  var tokens = Scanner.lex('var x, y; begin x := 7; y := 1; end. ');
-  // tokens.forEach((element) {
-  //   print(element.toString());
-  // });
-  var ast = Parser(tokens).parse();
-  // print(ast);
-  ast.forEach(print);
+  if (args.isEmpty) exit(0);
+  var code = File(args[0]).readAsStringSync();
+  var tokens = Scanner.lex(code);
+  var program_ast = Parser(tokens).parse();
+  print(program_ast);
 }

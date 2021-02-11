@@ -8,3 +8,9 @@
 # зависимости: make, dart-sdk-2.x
 make
 ```
+
+### Test-CLI
+```bash
+# дамп AST
+./pl0 examples/fact.pas
+```
