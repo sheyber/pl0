@@ -38,8 +38,9 @@ void main(List<String> args) {
 
 void print_asm_pcode(List<PCode> pcodes) {
   for (var i in pcodes) {
-    if (i.arg != 'main_start_point' && i.type != Instructions.LABEL)
-      stdout.write('\t');
+    if (i.arg != 'main_start_point' &&
+        i.type != Instructions.LABEL &&
+        i.type != Instructions.DEFINE_CONST) stdout.write('\t');
     if (i.type == Instructions.LABEL) {
       print('\u001b[35m$i \u001b[0m');
     } else {

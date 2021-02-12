@@ -36,6 +36,7 @@ class VirtualMachine {
   void _searchLabels(List<PCode> pcodes) {
     for (var i = 0; i < pcodes.length; i++)
       if (pcodes[i].type == Instructions.LABEL) _labelTable[pcodes[i].arg] = i;
+    assert(_labelTable.containsKey('main_start_point') == true);
   }
 
   void _execute(List<PCode> pcodes) {

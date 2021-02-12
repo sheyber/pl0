@@ -5,10 +5,12 @@ class CodeGenerator {
   List<Map> _program;
   List<PCode> _pcodes;
   int _temp;
+  Map<String, String> _tableOfConstants;
 
   CodeGenerator(this._program)
       : _pcodes = List<PCode>(),
-        _temp = 0;
+        _temp = 0,
+        _tableOfConstants = Map<String, String>();
 
   void _addPCode(Instructions instruction, [String arg = null]) {
     var pcode = PCode(instruction, arg);
@@ -63,7 +65,10 @@ class CodeGenerator {
         _addPCode(Instructions.NOT_EQ);
         break;
       case NodeType.VARIABLE_NAME:
-        _addPCode(Instructions.FETCH, node['name']);
+        if (_tableOfConstants.containsKey(node['name']))
+          _addPCode(Instructions.PUSH, _tableOfConstants[node['name']]);
+        else
+          _addPCode(Instructions.FETCH, node['name']);
         break;
       case NodeType.SET_VAR:
         _gen(node['value']);
@@ -100,11 +105,11 @@ class CodeGenerator {
         for (var i in node['body']) _gen(i);
         break;
       case NodeType.SET_CONST:
-        for (List i in node['pairs'])
-          _addPCode(Instructions.DEFINE_CONST, i.join(' '));
+        for (List i in node['pairs']) _tableOfConstants[i[0]] = i[1];
         break;
       case NodeType.PROC_DEFINE:
         _addPCode(Instructions.LABEL, node['name']);
+        _gen(node['block']);
         _gen(node['body']);
         _addPCode(Instructions.RET);
         break;
