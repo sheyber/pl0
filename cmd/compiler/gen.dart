@@ -76,7 +76,10 @@ class CodeGenerator {
         int t = _temp++;
         _gen(node['cond']);
         _addPCode(Instructions.JZ, 'else$t');
+        // _addPCode(Instructions.JMP, 'then$t');
+        // _addPCode(Instructions.LABEL, 'then$t');
         _gen(node['body']);
+        _addPCode(Instructions.JMP, 'else$t');
         _addPCode(Instructions.LABEL, 'else$t');
         break;
       case NodeType.WHILE:

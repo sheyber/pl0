@@ -226,7 +226,9 @@ class Parser {
       } else if (current.value == 'if') {
         // "if" condition "then" statement
         var cond = _condition();
-        _here_must_be('then', _nextToken());
+        _pos++;
+        if (_nextToken().value != 'then')
+          _throwSimpleSyntaxError('here must be `then`', _tokens[_pos - 1]);
         var stmt = _statement();
         return {
           'type': NodeType.IF,
@@ -237,7 +239,9 @@ class Parser {
       } else if (current.value == 'while') {
         // "while" condition "do" statement
         var cond = _condition();
-        _here_must_be('do', _nextToken());
+        _pos++;
+        if (_nextToken().value != 'do')
+          _throwSimpleSyntaxError('here must be `do`', _tokens[_pos - 1]);
         var stmt = _statement();
         return {
           'type': NodeType.WHILE,

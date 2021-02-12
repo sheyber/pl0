@@ -14,6 +14,36 @@ void main(List<String> args) {
       var program_ast = Parser(tokens).parse();
       var pcodes = CodeGenerator(program_ast).compile();
       VirtualMachine().run(pcodes);
+    } else if (args[0] == '-edev') {
+      var code = args[1];
+      var tokens = Scanner.lex(code);
+      var program_ast = Parser(tokens).parse();
+      var pcodes = CodeGenerator(program_ast).compile();
+      VirtualMachine().run(pcodes, dumpFrames: true, dumpStack: true);
+    } else if (args[0] == '-asm') {
+      var code = args[1];
+      var tokens = Scanner.lex(code);
+      var program_ast = Parser(tokens).parse();
+      var pcodes = CodeGenerator(program_ast).compile();
+      print_asm_pcode(pcodes);
+    }
+  } else {
+    print('''
+↬ PL/0 programming language. Ugly implementation written in Dart.
+    -e 'source code'    | execute code
+    -edev 'source code' | execute code with debug info
+    -asm 'source code'  | print a asm like PCode format''');
+  }
+}
+
+void print_asm_pcode(List<PCode> pcodes) {
+  for (var i in pcodes) {
+    if (i.arg != 'main_start_point' && i.type != Instructions.LABEL)
+      stdout.write('\t');
+    if (i.type == Instructions.LABEL) {
+      print('\u001b[35m$i \u001b[0m');
+    } else {
+      print(i);
     }
   }
 }
