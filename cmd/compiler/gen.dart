@@ -109,7 +109,8 @@ class CodeGenerator {
         break;
       case NodeType.PROC_DEFINE:
         _addPCode(Instructions.LABEL, node['name']);
-        _gen(node['block']);
+        // _gen(node['block']);
+        for (var i in node['blocks']) _gen(i);
         _gen(node['body']);
         _addPCode(Instructions.RET);
         break;

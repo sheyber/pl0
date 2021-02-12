@@ -315,33 +315,40 @@ class Parser {
 
         _here_must_be(';', _getCurrentToken());
 
-        var block = _block(in_procedure: true);
-        var body = null;
-
-        if (block['type'] == NodeType.DEC_VARS) {
-          body = _statement();
-          _here_must_be(';', _getCurrentToken());
-        } else {
-          _here_must_be(';', _getCurrentToken());
-          body = block;
-          block = null;
+        Map body;
+        List<Map> blocks = List<Map>();
+        while (true) {
+          var b = _block(in_procedure: true);
+          if (b['type'] == NodeType.BLOCK) {
+            body = b;
+            break;
+          } else if (b['type'] == NodeType.DEC_VARS ||
+              b['type'] == NodeType.SET_CONST) {
+            blocks.add(b);
+          } else {
+            _throwSimpleSyntaxError(
+                'here must be block or stmt', _getCurrentToken());
+          }
         }
 
         return {
           'type': NodeType.PROC_DEFINE,
           'name': name,
           'body': body,
-          'block': block,
+          'blocks': blocks,
           'meta-line': current.line
         };
       }
     }
     _backToken();
     var stmt = _statement();
-    if (!in_procedure) if (stmt['type'] == NodeType.BLOCK) {
-      _here_must_be('.', _getCurrentToken());
-      stmt['type'] = NodeType.MAIN_BLOCK;
-    }
+    if (!in_procedure) {
+      if (stmt['type'] == NodeType.BLOCK) {
+        _here_must_be('.', _getCurrentToken());
+        stmt['type'] = NodeType.MAIN_BLOCK;
+      }
+    } else if (in_procedure && stmt['type'] == NodeType.BLOCK)
+      _here_must_be(';', _getCurrentToken());
     return stmt;
   }
 
