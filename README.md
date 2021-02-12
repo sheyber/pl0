@@ -9,12 +9,6 @@
 make
 ```
 
-### Test-CLI
-```bash
-# дамп AST
-./pl0 examples/fact.pas
-```
-
 ### TODO
 - [x] Lexer
 - [x] Parser
