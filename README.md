@@ -15,7 +15,7 @@ make
 - [ ] Semantic analyzer
 - [ ] Smarter error handling
 - [ ] Stupid optimization
-- [ ] Compiler
+- [ ] Code generation
 - [ ] Virtual Machine
 - [ ] CLI
 - [ ] Testing and debug

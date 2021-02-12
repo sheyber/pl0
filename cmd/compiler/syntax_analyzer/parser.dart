@@ -35,7 +35,8 @@ enum NodeType {
   WHILE,
   SET_CONST,
   DEC_VARS,
-  PROC_DEFINE
+  PROC_DEFINE,
+  MAIN_BLOCK,
   // ...
 }
 
@@ -186,7 +187,7 @@ class Parser {
       if (current.value == 'call') {
         // "call" ident
         return {
-          'typep': NodeType.CALL_PROC,
+          'type': NodeType.CALL_PROC,
           'name': _nextToken().value,
           'meta-line': _getCurrentToken().line
         };
@@ -250,7 +251,7 @@ class Parser {
     return _condition();
   }
 
-  Map _block() {
+  Map _block({in_procedure = false}) {
     var current = _nextToken();
     if (current.type == TokenType.KEYWORD) {
       if (current.value == 'const') {
@@ -310,13 +311,14 @@ class Parser {
 
         _here_must_be(';', _getCurrentToken());
 
-        var block = _block();
+        var block = _block(in_procedure: true);
         var body = null;
 
         if (block['type'] == NodeType.DEC_VARS) {
           body = _statement();
           _here_must_be(';', _getCurrentToken());
         } else {
+          _here_must_be(';', _getCurrentToken());
           body = block;
           block = null;
         }
@@ -332,7 +334,10 @@ class Parser {
     }
     _backToken();
     var stmt = _statement();
-    if (stmt['type'] == NodeType.BLOCK) _here_must_be('.', _getCurrentToken());
+    if (!in_procedure) if (stmt['type'] == NodeType.BLOCK) {
+      _here_must_be('.', _getCurrentToken());
+      stmt['type'] = NodeType.MAIN_BLOCK;
+    }
     return stmt;
   }
 
