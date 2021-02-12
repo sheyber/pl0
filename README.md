@@ -16,6 +16,6 @@ make
 - [ ] Smarter error handling
 - [ ] Stupid optimization
 - [x] Code generation
-- [ ] Virtual Machine
+- [x] Virtual Machine
 - [ ] CLI
-- [ ] Testing and debug
+- [ ] Refactoring

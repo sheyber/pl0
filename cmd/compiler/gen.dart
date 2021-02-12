@@ -86,6 +86,7 @@ class CodeGenerator {
         _addPCode(Instructions.JZ, 'else_loop$t');
         _gen(node['body']);
         _addPCode(Instructions.JMP, 'loop$t');
+        _addPCode(Instructions.LABEL, 'else_loop$t');
         break;
       case NodeType.MAIN_BLOCK:
         _addPCode(Instructions.LABEL, 'main_start_point');
