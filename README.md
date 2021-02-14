@@ -14,7 +14,7 @@ make
 - [x] Parser
 - [ ] Semantic analyzer
 - [ ] Smarter error handling
-- [ ] Stupid optimization
+- [x] Stupid optimization
 - [x] Code generation
 - [x] Virtual Machine
 - [ ] CLI
