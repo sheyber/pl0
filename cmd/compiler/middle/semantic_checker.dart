@@ -108,9 +108,16 @@ class SemanticChecker {
               'name of procedure can\'t be keyword in\n\t${node["meta-line"]}| ${_reconstruction(node)}',
               node);
 
+        _scopes.add([]);
+        _scopesOfConstants.add([]);
+
         (node['blocks'] as List).forEach((element) => _check(element));
         _check(node['body']);
         _scopes.first.add(node['name']);
+
+        _scopes.removeLast();
+        _scopes.removeLast();
+        _scopesOfConstants.removeLast();
         break;
       case NodeType.CALL_PROC:
         if (!_scopes.first.contains(node['name']))
@@ -127,10 +134,11 @@ class SemanticChecker {
 
     for (var i in _program) _check(i);
 
-    _usedVariables.forEach((key, value) {
-      if (key == 'out') return; // magic
-      if (value == 0) _throwSemanticWarning('unused the "$key" variable');
-    });
+    if (errorsCount == 0)
+      _usedVariables.forEach((key, value) {
+        if (key == 'out') return; // magic
+        if (value == 0) _throwSemanticWarning('unused the "$key" variable');
+      });
 
     return (errorsCount > 0) ? false : true;
   }
