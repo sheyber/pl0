@@ -82,6 +82,10 @@ class SemanticChecker {
         break;
       case NodeType.DEC_VARS:
         for (var i in node['names']) {
+          if (Scanner.keywords.contains(i)) {
+            _throwSemanticError('name of variable can\'t be a keyword', node);
+            continue;
+          }
           _scopes.last.add(i);
           _usedVariables[i] = 0;
         }
