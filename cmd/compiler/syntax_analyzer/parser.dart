@@ -72,15 +72,15 @@ class Parser {
 
       if (!_checkTokenValue(_nextToken(), ')')) {
         _throwSimpleSyntaxError(
-            'Не могу найти закрывающаю скобку', _getCurrentToken());
+            'Не могу найти закрывающаю скобку\n\t${_debugLine(_tokens[_pos])}',
+            _getCurrentToken());
       }
 
       return expr;
     }
 
     _throwSimpleSyntaxError(
-        'can\'t make a node in factor:\n\t${_debugLine(current)}\n\t↑',
-        current);
+        'can\'t make a node:\n\t${_debugLine(current)}', current);
   }
 
   // term = factor {("*"|"/") factor}.
@@ -198,8 +198,9 @@ class Parser {
         } else if (_checkTokenValue(lookahead, 'end')) {
           break;
         }
+
         _throwSimpleSyntaxError(
-            'can\'t found a `end` for close the block', lookahead);
+            'some error in block\n\t${_debugLine(_nextToken())}', lookahead);
       }
     }
 
@@ -213,8 +214,10 @@ class Parser {
   Map _parseIfStmt(Token current) {
     var condition = _condition();
 
-    if (!_checkTokenValue(_nextToken(), 'then')) {
-      _throwSimpleSyntaxError('После условия должно идти ключевое слово `then`',
+    var lookahead = _nextToken();
+    if (!_checkTokenValue(lookahead, 'then')) {
+      _throwSimpleSyntaxError(
+          'После условия должно идти ключевое слово `then`\n\t${_debugLine(lookahead)}',
           _getCurrentToken());
     }
 
@@ -231,9 +234,11 @@ class Parser {
   Map _parseWhileStmt(Token current) {
     var condition = _condition();
 
-    if (!_checkTokenValue(_nextToken(), 'do')) {
+    var lookahead = _nextToken();
+    if (!_checkTokenValue(lookahead, 'do')) {
       _throwSimpleSyntaxError(
-          'После условия в цикле идёт ключевое слово `do`', _getCurrentToken());
+          'После условия в цикле идёт ключевое слово `do` \n\t${_debugLine(_tokens[_pos - 2])}',
+          _getCurrentToken());
     }
 
     var statement = _statement();
@@ -249,9 +254,10 @@ class Parser {
   Map _parseSetVarStmt(Token current) {
     var name = current.value;
 
-    if (!_checkTokenValue(_nextToken(), ':=')) {
+    var lookahead = _nextToken();
+    if (!_checkTokenValue(lookahead, ':=')) {
       _throwSimpleSyntaxError(
-          'Для инициализации перменной следует использовать оператор `:=` in',
+          'Для инициализации перменной следует использовать оператор `:=` in\n\t${_debugLine(lookahead)}',
           _getCurrentToken());
     }
 
@@ -269,12 +275,7 @@ class Parser {
     var current = _nextToken();
 
     if (current.type == TokenType.IDENT) {
-      // ident ":=" expression
-      if (_checkTokenValue(_nextToken(), ':=')) {
-        _backToken();
-        return _parseSetVarStmt(current);
-      }
-      _backToken();
+      return _parseSetVarStmt(current);
     } else if (current.type == TokenType.KEYWORD) {
       switch (current.value) {
         case 'call':
@@ -298,9 +299,10 @@ class Parser {
     while (true) {
       var nameOfConstant = _nextToken().value;
 
-      if (!_checkTokenValue(_nextToken(), '=')) {
+      var lookahead_0 = _nextToken();
+      if (!_checkTokenValue(lookahead_0, '=')) {
         _throwSimpleSyntaxError(
-            'after name of constant should be a value. For this must be a `=` after name.',
+            'after name of constant should be a value. For this must be a `=` after name.\n\t${_debugLine(lookahead_0)}',
             _getCurrentToken());
       }
 
@@ -312,10 +314,18 @@ class Parser {
       if (_checkTokenType(lookahead, TokenType.SEM)) {
         break;
       } else if (_checkTokenType(lookahead, TokenType.COMMA)) {
+        var lookahead_2 = _nextToken();
+        if (!_checkTokenType(lookahead_2, TokenType.IDENT))
+          _throwSimpleSyntaxError(
+              'после зяпятой идёт инициализация константы\n\t${_debugLine(lookahead_2)}',
+              lookahead_2);
+        _backToken();
         continue;
       }
 
-      _throwSimpleSyntaxError('can\'t parsing a constants stmt', lookahead);
+      _throwSimpleSyntaxError(
+          'can\'t parsing a constants stmt\n\t${_debugLine(_tokens[_pos - 2])}',
+          lookahead);
     }
 
     return {
@@ -336,11 +346,18 @@ class Parser {
       if (_checkTokenType(lookahead, TokenType.SEM)) {
         break;
       } else if (_checkTokenType(lookahead, TokenType.COMMA)) {
+        var lookahead2 = _nextToken();
+        if (!_checkTokenType(lookahead2, TokenType.IDENT))
+          _throwSimpleSyntaxError(
+              'после запятой идёт след. имя перменной\n\t${_debugLine(lookahead2)}',
+              lookahead2);
+        _backToken();
         continue;
       }
 
       _throwSimpleSyntaxError(
-          'Не удаётся распознать декларацию перменных', _getCurrentToken());
+          'Не удаётся распознать декларацию перменных\n\t${_debugLine(_tokens[_pos])}',
+          _getCurrentToken());
     }
 
     return {
@@ -355,7 +372,8 @@ class Parser {
 
     if (!_checkTokenType(_nextToken(), TokenType.SEM)) {
       _throwSimpleSyntaxError(
-          'После имени процедуры должен идти `;`', _getCurrentToken());
+          'После имени процедуры должен идти `;`\n\t${_debugLine(_tokens[_pos - 1])}',
+          _getCurrentToken());
     }
 
     Map body;
@@ -413,7 +431,8 @@ class Parser {
       stmt['type'] = NodeType.MAIN_BLOCK;
     } else if (in_procedure && stmt['type'] == NodeType.BLOCK) {
       if (!_checkTokenType(_nextToken(), TokenType.SEM)) {
-        _throwSimpleSyntaxError('нада `;`', _getCurrentToken());
+        _throwSimpleSyntaxError(
+            'нада `;`\n\t${_debugLine(_tokens[_pos])}', _getCurrentToken());
       }
     }
 
@@ -430,11 +449,13 @@ class Parser {
   }
 
   String _debugLine(Token current) {
-    var line = '${current.value} ';
+    var line = '';
     var current_line = current.line;
-    while (_nextToken().line == current_line) {
-      _backToken();
-      line += _nextToken().value + ' ';
+
+    for (var i = 0; i < _tokens.length; i++) {
+      if (_tokens[i].line == current_line) {
+        line += _tokens[i].value + ' ';
+      }
     }
     return line;
   }

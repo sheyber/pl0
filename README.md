@@ -13,7 +13,7 @@ make
 - [x] Lexer
 - [x] Parser
 - [x] Semantic analyzer
-- [ ] Smarter error handling
+- [x] ~~Smarter error handling~~ ugly error handling
 - [x] Stupid optimization
 - [x] Code generation
 - [x] Virtual Machine
