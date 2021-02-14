@@ -50,10 +50,10 @@ class SemanticChecker {
         for (var i in _scopes) if (i.contains(name)) match = true;
         for (var i in _scopesOfConstants)
           if (i.contains(name)) {
-            match = true;
             _throwSemanticError(
                 'you are trying to set the value of a constant $name in\n\t${node["meta-line"]}| ${_reconstruction(node)}',
                 node);
+            return;
           }
 
         if (!match)
