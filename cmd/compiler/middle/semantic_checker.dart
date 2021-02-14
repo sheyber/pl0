@@ -91,7 +91,11 @@ class SemanticChecker {
         }
         break;
       case NodeType.SET_CONST:
-        for (List i in node['pairs']) _scopesOfConstants.last.add(i[0]);
+        for (List i in node['pairs']) {
+          _scopesOfConstants.last.add(i[0]);
+          _usedVariables[i[0]] = 0;
+        }
+        ;
         break;
       case NodeType.WHILE:
       case NodeType.IF:
@@ -118,12 +122,13 @@ class SemanticChecker {
   }
 
   bool check() {
-    _scopes.add([]);
+    _scopes.add(['print']);
     _scopesOfConstants.add([]);
 
     for (var i in _program) _check(i);
 
     _usedVariables.forEach((key, value) {
+      if (key == 'out') return; // magic
       if (value == 0) _throwSemanticWarning('unused the "$key" variable');
     });
 

@@ -9,6 +9,10 @@
 make
 ```
 
+```
+./pl0 examples/fact.pas
+```
+
 ### TODO
 - [x] Lexer
 - [x] Parser
@@ -17,7 +21,7 @@ make
 - [x] Stupid optimization
 - [x] Code generation
 - [x] Virtual Machine
-- [ ] CLI
+- [x] CLI
 - [ ] Write tests and debug
 - [ ] Refactoring
 
