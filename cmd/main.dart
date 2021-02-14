@@ -2,6 +2,7 @@ import 'dart:io';
 
 import './compiler/syntax_analyzer/scanner.dart';
 import 'compiler/gen.dart';
+import 'compiler/middle/semantic_checker.dart';
 import 'compiler/syntax_analyzer/parser.dart';
 import 'vmachine/pcode.dart';
 import 'vmachine/vmachine.dart';
@@ -14,6 +15,7 @@ void main(List<String> args) {
       var tokens = Scanner.lex(code);
       var program_ast = Parser(tokens).parse();
       // testing
+      if (!SemanticChecker(program_ast).check()) exit(0);
       program_ast = Optimization(program_ast).getProgram();
       // end testing
       var pcodes = CodeGenerator(program_ast).compile();
@@ -23,6 +25,7 @@ void main(List<String> args) {
       var tokens = Scanner.lex(code);
       var program_ast = Parser(tokens).parse();
       // testing
+      if (!SemanticChecker(program_ast).check()) exit(0);
       program_ast = Optimization(program_ast).getProgram();
       // end testing
       var pcodes = CodeGenerator(program_ast).compile();
@@ -32,6 +35,7 @@ void main(List<String> args) {
       var tokens = Scanner.lex(code);
       var program_ast = Parser(tokens).parse();
       // testing
+      if (!SemanticChecker(program_ast).check()) exit(0);
       if (args[0] != '-asm-no')
         program_ast = Optimization(program_ast).getProgram();
       // end testing

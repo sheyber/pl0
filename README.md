@@ -12,12 +12,13 @@ make
 ### TODO
 - [x] Lexer
 - [x] Parser
-- [ ] Semantic analyzer
+- [x] Semantic analyzer
 - [ ] Smarter error handling
 - [x] Stupid optimization
 - [x] Code generation
 - [x] Virtual Machine
 - [ ] CLI
+- [ ] Write tests and debug
 - [ ] Refactoring
 
 ### Литература

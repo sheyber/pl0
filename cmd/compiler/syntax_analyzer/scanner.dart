@@ -26,7 +26,7 @@ class Scanner {
     '.': TokenType.END_POINT
   };
 
-  static const _keywords = [
+  static const keywords = [
     'begin',
     'end',
     'const',
@@ -73,7 +73,7 @@ class Scanner {
     return tokens;
   }
 
-  static bool _isKeyword(String value) => _keywords.contains(value);
+  static bool _isKeyword(String value) => keywords.contains(value);
   static bool _isSym(String value) => _syms.containsKey(value);
 
   static _throwScannerError(String msg, {int line}) {
