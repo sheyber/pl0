@@ -53,7 +53,8 @@ class Scanner {
         i--;
       } else if (_word.contains(current)) {
         var value = "";
-        while (i < source.length && _word.contains(source[i]))
+        while (i < source.length && (_word.contains(source[i]) 
+                || _number.contains(source[i])))
           value += source[i++];
         var type = (_isKeyword(value)) ? TokenType.KEYWORD : TokenType.IDENT;
         tokens.add(Token(type, value, lines));
