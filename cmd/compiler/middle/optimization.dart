@@ -1,30 +1,26 @@
 import '../syntax_analyzer/parser.dart';
 
 class Optimization {
-  static const _binops = [
-    NodeType.ADD,
-    NodeType.SUB,
-    NodeType.MULTIPLY,
-    NodeType.DIV,
-    NodeType.LESS,
-    NodeType.MORE,
-    NodeType.EQ,
-    NodeType.NOT_EQ
-  ];
+  static final _binops = {
+    NodeType.ADD: (int a, int b) => a + b,
+    NodeType.SUB: (int a, int b) => a - b,
+    NodeType.MULTIPLY: (int a, int b) => a * b,
+    NodeType.DIV: (int a, int b) => (a / b) as int,
+    NodeType.MORE: (int a, int b) => (a > b) ? 1 : 0,
+    NodeType.LESS: (int a, int b) => (a < b) ? 1 : 0,
+    NodeType.EQ: (int a, int b) => (a == b) ? 1 : 0,
+    NodeType.NOT_EQ: (int a, int b) => (a != b) ? 1 : 0
+  };
 
   List<Map> _program;
   Map<String, String> _constantsTable;
+  List<Map> _newListProgram;
+  List<Map> _buffTemp;
 
-  Optimization(this._program) : _constantsTable = Map<String, String>();
-
-  int _add(int a, int b) => a + b;
-  int _sub(int a, int b) => a - b;
-  int _mul(int a, int b) => a * b;
-  int _div(int a, int b) => (a / b) as int;
-  int _more(int a, int b) => (a > b) ? 1 : 0;
-  int _less(int a, int b) => (a < b) ? 1 : 0;
-  int _eq(int a, int b) => (a == b) ? 1 : 0;
-  int _noteq(int a, int b) => (a != b) ? 1 : 0;
+  Optimization(this._program)
+      : _constantsTable = Map<String, String>(),
+        _newListProgram = List<Map>(),
+        _buffTemp = List<Map>();
 
   int _evalBinOp(Function op, Map left, Map right) =>
       op(int.parse(left['value']), int.parse(right['value']));
@@ -34,22 +30,30 @@ class Optimization {
 
     var type = node['type'];
 
-    if (_binops.contains(type)) {
+    if (_binops.containsKey(type)) {
       var l = _optimize(node['left']);
       var r = _optimize(node['right']);
 
+      // Удаление общих подвыражений
+      if (_binops.containsKey(l['type']) && _binops.containsKey(r['type'])) {
+        if (l['left']['type'] == NodeType.VARIABLE_NAME &&
+            r['left']['type'] == NodeType.VARIABLE_NAME &&
+            l['left']['name'] == r['left']['name'] &&
+            l['right']['name'] == r['right']['name']) {
+          print('da');
+          _buffTemp.add(l);
+          _buffTemp.add({'type': NodeType.SET_VAR, 'name': '_temp'});
+          Map temp = {'type': NodeType.VARIABLE_NAME, 'name': '_temp'};
+          node['left'] = temp;
+          node['right'] = temp;
+          return node;
+        }
+      }
+
+      // constant folding
       if (l['type'] == NodeType.CONST_NUMBER &&
           r['type'] == NodeType.CONST_NUMBER) {
-        var op = ({
-          NodeType.ADD: _add,
-          NodeType.SUB: _sub,
-          NodeType.MULTIPLY: _mul,
-          NodeType.DIV: _div,
-          NodeType.MORE: _more,
-          NodeType.LESS: _less,
-          NodeType.EQ: _eq,
-          NodeType.NOT_EQ: _noteq
-        })[node['type']];
+        var op = _binops[node['type']];
         node['value'] = (_evalBinOp(op, l, r)).toString();
         node['type'] = NodeType.CONST_NUMBER;
         return node;
@@ -58,12 +62,24 @@ class Optimization {
       node['value'] = _optimize(node['value']);
       return node;
     } else if (type == NodeType.BLOCK || type == NodeType.MAIN_BLOCK) {
-      node['body'] = (node['body'] as List).map((e) => _optimize(e));
+      var nodeBody = node['body'] as List;
+      var body = [];
+
+      for (var i = 0; i < nodeBody.length; i++) {
+        var o = _optimize(nodeBody[i]);
+        for (var j in _buffTemp) body.add(j);
+        _buffTemp.clear();
+        body.add(o);
+      }
+
+      node['body'] = body;
+      return node;
     } else if (type == NodeType.PROC_DEFINE) {
       node['body'] = _optimize(node['body']);
     } else if (type == NodeType.IF || type == NodeType.WHILE) {
       node['cond'] = _optimize(node['cond']);
       node['body'] = _optimize(node['body']);
+      // delete dead code
       if (node['cond']['type'] == NodeType.CONST_NUMBER &&
           node['cond']['value'] == '0') {
         return null;
@@ -71,6 +87,7 @@ class Optimization {
     } else if (type == NodeType.SET_CONST) {
       for (List i in node['pairs']) _constantsTable[i[0]] = i[1];
     } else if (type == NodeType.VARIABLE_NAME) {
+      // replace name on scalar
       if (_constantsTable.containsKey(node['name'])) {
         node['value'] = _constantsTable[node['name']];
         node['type'] = NodeType.CONST_NUMBER;
@@ -81,8 +98,7 @@ class Optimization {
   }
 
   List<Map> getProgram() {
-    var newListProgram = List<Map>();
-    for (var i in _program) newListProgram.add(_optimize(i));
-    return newListProgram;
+    for (var i in _program) _newListProgram.add(_optimize(i));
+    return _newListProgram;
   }
 }

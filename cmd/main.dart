@@ -27,12 +27,13 @@ void main(List<String> args) {
       // end testing
       var pcodes = CodeGenerator(program_ast).compile();
       VirtualMachine().run(pcodes, dumpFrames: true, dumpStack: true);
-    } else if (args[0] == '-asm') {
+    } else if (args[0] == '-asm' || args[0] == '-asm-no') {
       var code = args[1];
       var tokens = Scanner.lex(code);
       var program_ast = Parser(tokens).parse();
       // testing
-      program_ast = Optimization(program_ast).getProgram();
+      if (args[0] != '-asm-no')
+        program_ast = Optimization(program_ast).getProgram();
       // end testing
       var pcodes = CodeGenerator(program_ast).compile();
       print_asm_pcode(pcodes);
