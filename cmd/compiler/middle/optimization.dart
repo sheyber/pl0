@@ -75,6 +75,7 @@ class Optimization {
       node['body'] = body;
       return node;
     } else if (type == NodeType.PROC_DEFINE) {
+      (node['blocks'] as List).forEach((e) => _optimize(e));
       node['body'] = _optimize(node['body']);
     } else if (type == NodeType.IF || type == NodeType.WHILE) {
       node['cond'] = _optimize(node['cond']);

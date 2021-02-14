@@ -367,8 +367,10 @@ class Parser {
       if (block['type'] == NodeType.BLOCK) {
         body = block;
         break;
-      } else if ([NodeType.DEC_VARS, NodeType.BLOCK].contains(block['type'])) {
+      } else if ([NodeType.DEC_VARS, NodeType.SET_CONST]
+          .contains(block['type'])) {
         blocks.add(block);
+        continue;
       }
 
       _throwSimpleSyntaxError('Не кен', _getCurrentToken());
