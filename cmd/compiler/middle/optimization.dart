@@ -81,9 +81,12 @@ class Optimization {
       node['cond'] = _optimize(node['cond']);
       node['body'] = _optimize(node['body']);
       // delete dead code
-      if (node['cond']['type'] == NodeType.CONST_NUMBER &&
-          node['cond']['value'] == '0') {
+      var constCond = int.parse(node['cond']['value']);
+      if (node['cond']['type'] == NodeType.CONST_NUMBER && constCond <= 0) {
         return null;
+      } else if (node['cond']['type'] == NodeType.CONST_NUMBER &&
+          constCond > 0) {
+        return node['body'];
       }
     } else if (type == NodeType.SET_CONST) {
       for (List i in node['pairs']) _constantsTable[i[0]] = i[1];
