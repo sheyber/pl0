@@ -81,12 +81,17 @@ class Optimization {
       node['cond'] = _optimize(node['cond']);
       node['body'] = _optimize(node['body']);
       // delete dead code
-      var constCond = int.parse(node['cond']['value']);
-      if (node['cond']['type'] == NodeType.CONST_NUMBER && constCond <= 0) {
-        return null;
-      } else if (node['cond']['type'] == NodeType.CONST_NUMBER &&
-          constCond > 0) {
-        return node['body'];
+      if (node['cond']['type'] == NodeType.CONST_NUMBER) {
+        // Если условие является истинным во время компиляции,
+        // то проверка условия удаляется и остается одно тело,
+        // а если условие будет ложным, то этот участов удаляется,
+        // ибо в него мы никогда не зайдём.
+        var constCond = int.parse(node['cond']['value']);
+        if (constCond <= 0) {
+          return null;
+        } else if (constCond > 0) {
+          return node['body'];
+        }
       }
     } else if (type == NodeType.SET_CONST) {
       for (List i in node['pairs']) _constantsTable[i[0]] = i[1];
