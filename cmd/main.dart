@@ -78,8 +78,9 @@ void main(List<String> args) {
 
   print('''
 ↬ PL/0 programming language. Ugly implementation written in Dart.
-    file                | execure a file
-    -e 'source code'    | execute a code
-    -edev 'source code' | execute a code with debug info
-    -asm 'source code'  | print a IR as asm''');
+    file                  | execure a file
+    -e 'source code'      | execute a code
+    -edev 'source code'   | execute a code with debug info
+    -asm 'source code'    | print a IR as asm
+    -asm-no 'source code' | print a IR as asm without optimization''');
 }
