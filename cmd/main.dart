@@ -8,33 +8,91 @@ import 'vmachine/pcode.dart';
 import 'vmachine/vmachine.dart';
 import './compiler/middle/optimization.dart';
 
-class CLIPL0 {
-  static void executeCode(String source,
-      {semanticChecker = true,
-      optimization = true,
-      dumpInfoAboutVM = false,
-      seeAsm = false}) {
-    var tokens = Scanner.lex(source);
-    var ast = Parser(tokens).parse();
+class CLI {
+  // общие
+  List<String> _args;
+  List<String> _flags;
+  String _nameOfFile;
+  // параметры интерпретации
+  bool _showAsm, _dupmsInfoAboutExec, _optimization, _checkSemantic;
 
-    if (semanticChecker) {
-      var correct = SemanticChecker(ast).check();
-      if (!correct) exit(0);
+  CLI(this._args)
+      : _flags = List<String>(),
+        _showAsm = false,
+        _dupmsInfoAboutExec = false,
+        _optimization = true,
+        _checkSemantic = true {
+    this._parse();
+    this._executeFlags();
+  }
+
+  void _parse() {
+    for (var arg in _args) {
+      if (arg[0] == '-')
+        _flags.add(arg);
+      else
+        _nameOfFile = arg;
     }
 
-    if (optimization) {
-      ast = Optimization(ast).getProgram();
+    if (_nameOfFile == null || _nameOfFile.isEmpty) {
+      print('Не указан файл');
+      exit(0);
+    }
+  }
+
+  void _executeFlags() {
+    for (var flag in _flags)
+      switch (flag) {
+        case '-asm':
+          _showAsm = true;
+          break;
+        case '-no':
+          _optimization = false;
+          break;
+        case '-dev':
+          _dupmsInfoAboutExec = true;
+          break;
+        case '-ns':
+          _checkSemantic = false;
+          break;
+        default:
+          print('unknow option `$flag`');
+          exit(0);
+      }
+  }
+
+  String _loadFile(String namefile) {
+    try {
+      return File(namefile).readAsStringSync();
+    } catch (e) {
+      print(e);
+      exit(0);
+    }
+  }
+
+  void execute() {
+    // Syntax analyzing
+    var sourceCode = _loadFile(_nameOfFile);
+    var tokens = Scanner.lex(sourceCode);
+    var node = Parser(tokens).parse();
+
+    // middle step
+    if (_checkSemantic) SemanticChecker(node).check();
+    if (_optimization) node = Optimization(node).getProgram();
+
+    // кодогенерация
+    var pcodes = CodeGenerator(node).compile();
+
+    // доп.
+    if (_showAsm) {
+      _printAsm(pcodes);
+      exit(0);
     }
 
-    var lir = CodeGenerator(ast).compile();
-
-    if (seeAsm) {
-      _printAsm(lir);
-      return;
-    }
-
-    VirtualMachine()
-        .run(lir, dumpFrames: dumpInfoAboutVM, dumpStack: dumpInfoAboutVM);
+    // этап исполнения
+    var vm = VirtualMachine();
+    vm.run(pcodes,
+        dumpFrames: _dupmsInfoAboutExec, dumpStack: _dupmsInfoAboutExec);
   }
 
   static void _printAsm(List<PCode> pcodes) {
@@ -52,35 +110,15 @@ class CLIPL0 {
 }
 
 void main(List<String> args) {
-  if (args.isNotEmpty) {
-    if (args[0] == '-e') {
-      var code = args[1];
-      CLIPL0.executeCode(code);
-    } else if (args[0] == '-edev') {
-      var code = args[1];
-      CLIPL0.executeCode(code, dumpInfoAboutVM: true);
-    } else if (args[0] == '-asm') {
-      var code = args[1];
-      CLIPL0.executeCode(code, seeAsm: true);
-    } else if (args[0] == '-asm-no') {
-      var code = args[1];
-      CLIPL0.executeCode(code, seeAsm: true, optimization: false);
-    } else {
-      try {
-        var code = File(args[0]).readAsStringSync();
-        CLIPL0.executeCode(code);
-      } catch (e) {
-        print(e);
-      }
-    }
-    return;
-  }
-
-  print('''
-↬ PL/0 programming language. Ugly implementation written in Dart.
-    file                  | execure a file
-    -e 'source code'      | execute a code
-    -edev 'source code'   | execute a code with debug info
-    -asm 'source code'    | print a IR as asm
-    -asm-no 'source code' | print a IR as asm without optimization''');
+  if (args.length > 0)
+    CLI(args).execute();
+  else
+    print('''
+Ugly implementation PL/0 written in Dart. <3
+Usage: pl0 [options] file
+Options:
+  -no         execute without optimization
+  -ns         skip semantic checker
+  -dev        dump results of works virtual machine
+  -asm        print PCode/IR as asm-like style''');
 }
