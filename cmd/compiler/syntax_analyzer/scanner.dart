@@ -53,8 +53,8 @@ class Scanner {
         i--;
       } else if (_word.contains(current)) {
         var value = "";
-        while (i < source.length && (_word.contains(source[i]) 
-                || _number.contains(source[i])))
+        while (i < source.length &&
+            (_word.contains(source[i]) || _number.contains(source[i])))
           value += source[i++];
         var type = (_isKeyword(value)) ? TokenType.KEYWORD : TokenType.IDENT;
         tokens.add(Token(type, value, lines));
@@ -65,8 +65,6 @@ class Scanner {
         tokens.add(Token(_syms[current], current, lines));
       } else if (current == '\n') {
         lines++;
-      } else if (current != ' ' && current != '\t') {
-        _throwScannerError('unknow token "$current"', line: lines);
       }
     }
 
